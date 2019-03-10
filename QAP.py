@@ -1,19 +1,24 @@
 import math
 import random
 import time
-
 import numpy as np
 
 
 class QAP(object):
 
-    def __init__(self, file=None, pop_size=100, gen=100, p_x=0.7, p_m=0.1, tour=5, use_tour=False):
+    def __init__(self, file=None, pop_size=100, gen=100, p_x=0.7, p_m=0.1, tour=5, use_tour=False,
+                 use_pmx_crossover=False, use_elitist_selection=False, use_mutation=True, use_inversion=False):
         self.pop_size = pop_size
         self.gen = gen
         self.p_x = p_x
         self.p_m = p_m
         self.tour = tour
         self.use_tour = use_tour
+        self.use_pmx_crossover = use_pmx_crossover
+        self.use_elitist_selection = use_elitist_selection
+        self.best_chromosome = np.array([])
+        self.use_mutation = use_mutation
+        self.use_inversion = use_inversion
         self.counter = 0
         self.best_fit = math.inf
         if file is not None:
@@ -35,9 +40,9 @@ class QAP(object):
         if file is None:
             self.n = 5
             self.distance_matrix = np.array(
-            [[0, 4, 5, 1, 4], [1, 0, 5, 6, 7], [4, 6, 0, 1, 5], [3, 6, 7, 0, 2], [4, 6, 2, 5, 0]])
+                [[0, 4, 5, 1, 4], [1, 0, 5, 6, 7], [4, 6, 0, 1, 5], [3, 6, 7, 0, 2], [4, 6, 2, 5, 0]])
             self.cost_matrix = np.array(
-            [[0, 4, 5, 1, 4], [1, 0, 5, 6, 7], [4, 6, 0, 1, 5], [3, 6, 7, 0, 2], [4, 6, 2, 5, 0]])
+                [[0, 4, 5, 1, 4], [1, 0, 5, 6, 7], [4, 6, 0, 1, 5], [3, 6, 7, 0, 2], [4, 6, 2, 5, 0]])
         self.cur_pop = None
         self.evaluated_pop = None
         self.selected_pop = None
@@ -53,13 +58,13 @@ class QAP(object):
         pass
 
     def initialize(self):
-        start_pop = np.array([np.arange(1, self.n+1) for i in range(self.pop_size)])
+        start_pop = np.array([np.arange(1, self.n + 1) for i in range(self.pop_size)])
         for i in start_pop:
             np.random.shuffle(i)
         self.cur_pop = start_pop
 
     def evaluate(self, chromosome):
-        return sum(sum(self.distance_matrix[i] * self.cost_matrix[chromosome[i] - 1] for i in range(self.n)))+70
+        return sum(sum(self.distance_matrix[i] * self.cost_matrix[chromosome[i] - 1] for i in range(self.n))) + 80
 
     def evaluation(self):
         self.evaluated_pop = np.array([self.evaluate(i) for i in self.cur_pop])
@@ -76,6 +81,8 @@ class QAP(object):
 
     def selection(self):
         self.selected_pop = np.empty((0, self.n), int)
+        if self.use_elitist_selection:
+            self.best_chromosome = self.cur_pop[np.argmin(self.evaluated_pop)]
         if self.use_tour:
             for j in range(self.pop_size):
                 tour_members = np.empty((0, self.n), int)
@@ -83,7 +90,8 @@ class QAP(object):
                     chromosome = self.cur_pop[i]
                     tour_members = np.append(tour_members, np.array([chromosome]), axis=0)
                 evaluated_tour_members = np.array([self.evaluate(i) for i in tour_members])
-                self.selected_pop = np.append(self.selected_pop, np.array([tour_members[np.argmin(evaluated_tour_members)]]), axis=0)
+                self.selected_pop = np.append(self.selected_pop,
+                                              np.array([tour_members[np.argmin(evaluated_tour_members)]]), axis=0)
         else:
             self.pop_probabilities = np.array([])
             self.sum_of_probabilities = 0.0
@@ -111,7 +119,7 @@ class QAP(object):
         for j in range(len(parent_a) - (b - a)):
             repairing_index = b + j + 1
             if repairing_index > (len(parent_a) - 1):
-                repairing_index = (repairing_index % len(parent_a)) - 1
+                repairing_index = (repairing_index % len(parent_a))
 
             # uzupełnianie genów child_a
             for k in range(len(parent_a)):
@@ -132,13 +140,76 @@ class QAP(object):
                     break
         return child_a, child_b
 
+    def pmx_crossover(self, parent_a, parent_b):
+        a = random.randint(1, len(parent_a) - 3)
+        b = random.randint(a + 1, len(parent_a) - 2)
+
+        child_a = np.zeros(self.n, int)
+        child_b = np.zeros(self.n, int)
+
+        # wstrzyknięcie fragmentu genotypu drugiego rodzica
+        for i in range(a, b + 1):
+            np.put(np.asarray(child_a), i, parent_b[i])
+            np.put(np.asarray(child_b), i, parent_a[i])
+
+        # uzupełnienie genów
+        for j in range(len(parent_a) - (b - a)):
+            repairing_index = b + j + 1
+            if repairing_index > (len(parent_a) - 1):
+                repairing_index = (repairing_index % len(parent_a)) - 1
+
+            # uzupełnianie genów child_a
+            for k in range(len(parent_a)):
+                parent_index = repairing_index + k
+                if parent_index > (len(parent_a) - 1):
+                    parent_index = (parent_index % len(parent_a))
+                if not np.asarray(parent_a)[parent_index] in np.asarray(child_a):
+                    np.put(child_a, repairing_index, parent_a[parent_index])
+                    break
+                # wykorzystanie mapowania genów obecnych w chromosomie dziecka A na geny na tej samej pozycji w dziecku B
+                else:
+                    gene = np.asarray(parent_a)[parent_index]
+                    genes_checked = 0
+                    while gene in np.asarray(child_a) and genes_checked <= (b - a):
+                        gene = child_b[np.where(child_a == gene)[0]]
+                        genes_checked += 1
+                    if gene not in np.asarray(child_a):
+                        np.put(child_a, repairing_index, gene)
+                        break
+
+            # uzupełnianie genów child_b
+            for l in range(len(parent_b)):
+                parent_index = repairing_index + l
+                if parent_index > (len(parent_b) - 1):
+                    parent_index = (parent_index % len(parent_b))
+                if not np.asarray(parent_b)[parent_index] in child_b:
+                    np.put(child_b, repairing_index, parent_b[parent_index])
+                    break
+                # wykorzystanie mapowania genów obecnych w chromosomie dziecka A na geny na tej samej pozycji w dziecku B
+                else:
+                    gene = np.asarray(parent_b)[parent_index]
+                    genes_checked = 0
+                    while gene in np.asarray(child_b) and genes_checked <= (b - a):
+                        gene = child_a[np.where(child_b == gene)[0]]
+                        genes_checked += 1
+                    if gene not in np.asarray(child_b):
+                        np.put(child_b, repairing_index, gene)
+                        break
+
+        return child_a, child_b
+
     def crossover(self):
         self.new_pop = np.array([])
+        if self.use_elitist_selection:
+            self.new_pop = np.append(self.new_pop, self.best_chromosome, axis=0)
         parent_1 = None
         for i in self.selected_pop:
             if np.random.random() <= self.p_x:
                 if parent_1 is not None:
-                    child_1, child_2 = self.ox_crossover(parent_1, i)
+                    if self.use_pmx_crossover:
+                        child_1, child_2 = self.pmx_crossover(parent_1, i)
+                    else:
+                        child_1, child_2 = self.ox_crossover(parent_1, i)
                     self.new_pop = np.append(self.new_pop, child_1, axis=0)
                     self.new_pop = np.append(self.new_pop, child_2, axis=0)
                     parent_1 = None
@@ -163,6 +234,13 @@ class QAP(object):
                     changing_gene = random.choice([j for j in range(0, self.n) if j != i])
                     chromosome[i], chromosome[changing_gene] = chromosome[changing_gene], chromosome[i]
 
+    def inversion(self):
+        inversion_beginning = random.randint(1, self.n - 3)
+        inversion_ending = random.randint(inversion_beginning + 1, self.n - 2)
+        for chromosome in self.cur_pop:
+            if np.random.rand() <= self.p_m:
+                chromosome[inversion_beginning:inversion_ending] = np.flip(chromosome[inversion_beginning:inversion_ending])
+
     def run(self):
         best_fitnesses = np.array([])
         times = np.array([])
@@ -173,7 +251,10 @@ class QAP(object):
             for i in range(self.gen):
                 self.selection()
                 self.crossover()
-                self.mutation()
+                if self.use_mutation:
+                    self.mutation()
+                if self.use_inversion:
+                    self.inversion()
                 self.evaluation()
             print("Najlepsze przystosowanie: " + str(self.max_fitness))
             times = np.append(times, time.time() - start_time)
@@ -190,9 +271,12 @@ class QAP(object):
         for i in range(self.gen):
             self.selection()
             self.crossover()
-            self.mutation()
+            if self.use_mutation:
+                self.mutation()
+            if self.use_inversion:
+                self.inversion()
             self.evaluation()
         elapsed_time = time.time() - start_time
         print("Czas obliczeń: " + str(elapsed_time))
-        generations = np.arange(self.gen+1)
+        generations = np.arange(self.gen + 1)
         return self.worst_history, self.avg_history, self.best_history, generations

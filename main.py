@@ -1,27 +1,29 @@
 import QAP
 import matplotlib.pyplot as plt
 import numpy as np
+
+
 # -------------------- BADANIE WPLYWU ROZMIARU POPULACJI -------------------------
-qap_pop10 = QAP.QAP(file="Had20.txt", use_tour=True, pop_size=10)
-avg_pop10 = qap_pop10.run()
-
-qap_pop200 = QAP.QAP(file="Had20.txt", use_tour=True, pop_size=200)
-avg_pop200 = qap_pop200.run()
-
-qap_pop1000 = QAP.QAP(file="Had20.txt", use_tour=True, pop_size=1000)
-avg_pop1000 = qap_pop1000.run()
-
-objects = ('10', '200', '1000')
-y_pos = np.arange(len(objects))
-performance = [avg_pop10, avg_pop200, avg_pop1000]
-
-plt.bar(y_pos, performance, align='center', alpha=0.5)
-plt.xticks(y_pos, objects)
-plt.ylabel('Wartość funkcji przystosowania')
-plt.xlabel('Rozmiar populacji')
-plt.title('Najlepsza wartość funkcji przystosowania względem rozmiaru populacji')
-
-plt.show()
+# qap_pop10 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=10, use_pmx_crossover=True)
+# avg_pop10 = qap_pop10.run()
+#
+# qap_pop200 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=200, use_pmx_crossover=True)
+# avg_pop200 = qap_pop200.run()
+#
+# qap_pop1000 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=1000, use_pmx_crossover=True)
+# avg_pop1000 = qap_pop1000.run()
+#
+# objects = ('10', '200', '1000')
+# y_pos = np.arange(len(objects))
+# performance = [avg_pop10, avg_pop200, avg_pop1000]
+#
+# plt.bar(y_pos, performance, align='center', alpha=0.5)
+# plt.xticks(y_pos, objects)
+# plt.ylabel('Wartość funkcji przystosowania')
+# plt.xlabel('Rozmiar populacji')
+# plt.title('Najlepsza wartość funkcji przystosowania względem rozmiaru populacji')
+#
+# plt.show()
 # --------------------------------------------------------------------------------
 # -------------------- BADANIE WPLYWU LICZBY POKOLEN -----------------------------
 # qap_gen10 = QAP.QAP(file="Had20.txt", use_tour=True, gen=10)
@@ -180,4 +182,44 @@ plt.show()
 #
 # plt.show()
 # -------------------------------------------------------------------------------------
-
+# -------------------- BADANIE WPLYWU MUTACJI I INWERSJI -----------------------
+# qap_mut = QAP.QAP(file="Had12.txt", use_tour=True)
+# avg_mut = qap_mut.run()
+#
+# qap_inv = QAP.QAP(file="Had12.txt", use_tour=True, use_mutation=False, use_inversion=True)
+# avg_inv = qap_inv.run()
+#
+# qap_mut_inv = QAP.QAP(file="Had12.txt", use_tour=True, use_mutation=True, use_inversion=True)
+# avg_mut_inv = qap_mut_inv.run()
+#
+# objects = ('Mutacja', 'Inwersja', 'Mutacja + Inwersja')
+# y_pos = np.arange(len(objects))
+# performance = [avg_mut, avg_inv, avg_mut_inv]
+#
+# plt.bar(y_pos, performance, align='center', alpha=0.5)
+# plt.xticks(y_pos, objects)
+# plt.ylabel('Wartość funkcji przystosowania')
+# plt.xlabel('Wykorzystana metoda')
+# plt.title('Najlepsza wartość funkcji przystosowania względem wykorzystanej metody (mutacja i/lub inwersja)')
+#
+# plt.show()
+# -------------------------------------------------------------------------------------
+# -------------------- BADANIE WPLYWU OPERATORÓW OX I PMX -----------------------
+# qap_ox = QAP.QAP(file="Had12.txt", use_tour=True)
+# avg_ox = qap_ox.run()
+#
+# qap_pmx = QAP.QAP(file="Had12.txt", use_tour=True, use_pmx_crossover=True)
+# avg_pmx = qap_pmx.run()
+#
+# objects = ('Order Crossover (OX)', 'Partially-Mapped Crossover (PMX)')
+# y_pos = np.arange(len(objects))
+# performance = [avg_ox, avg_pmx]
+#
+# plt.bar(y_pos, performance, align='center', alpha=0.5)
+# plt.xticks(y_pos, objects)
+# plt.ylabel('Wartość funkcji przystosowania')
+# plt.xlabel('Wykorzystany operator krzyżowania')
+# plt.title('Najlepsza wartość funkcji przystosowania względem wykorzystanego operatora krzyżowania')
+#
+# plt.show()
+# -------------------------------------------------------------------------------------
