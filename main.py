@@ -4,26 +4,26 @@ import numpy as np
 
 
 # -------------------- BADANIE WPLYWU ROZMIARU POPULACJI -------------------------
-# qap_pop10 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=10, use_pmx_crossover=True)
-# avg_pop10 = qap_pop10.run()
-#
-# qap_pop200 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=200, use_pmx_crossover=True)
-# avg_pop200 = qap_pop200.run()
-#
-# qap_pop1000 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=1000, use_pmx_crossover=True)
-# avg_pop1000 = qap_pop1000.run()
-#
-# objects = ('10', '200', '1000')
-# y_pos = np.arange(len(objects))
-# performance = [avg_pop10, avg_pop200, avg_pop1000]
-#
-# plt.bar(y_pos, performance, align='center', alpha=0.5)
-# plt.xticks(y_pos, objects)
-# plt.ylabel('Wartość funkcji przystosowania')
-# plt.xlabel('Rozmiar populacji')
-# plt.title('Najlepsza wartość funkcji przystosowania względem rozmiaru populacji')
-#
-# plt.show()
+qap_pop10 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=10, use_pmx_crossover=True)
+avg_pop10 = qap_pop10.run()
+
+qap_pop200 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=200, use_pmx_crossover=True)
+avg_pop200 = qap_pop200.run()
+
+qap_pop1000 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=1000, use_pmx_crossover=True)
+avg_pop1000 = qap_pop1000.run()
+
+objects = ('10', '200', '1000')
+y_pos = np.arange(len(objects))
+performance = [avg_pop10, avg_pop200, avg_pop1000]
+
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+plt.xticks(y_pos, objects)
+plt.ylabel('Wartość funkcji przystosowania')
+plt.xlabel('Rozmiar populacji')
+plt.title('Najlepsza wartość funkcji przystosowania względem rozmiaru populacji')
+
+plt.show()
 # --------------------------------------------------------------------------------
 # -------------------- BADANIE WPLYWU LICZBY POKOLEN -----------------------------
 # qap_gen10 = QAP.QAP(file="Had20.txt", use_tour=True, gen=10)
