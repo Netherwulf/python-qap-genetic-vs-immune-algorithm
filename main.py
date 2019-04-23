@@ -247,10 +247,10 @@ import numpy as np
 # plt.show()
 # -------------------------------------------------------------------------------------
 # -------------------- ALGORYTM GENETYCZNY VS ALGORYTM IMMUNOLOGICZNY -------------------------
-qap_pop200 = QAP.QAP(file="Had12.txt", use_tour=True, pop_size=200, use_pmx_crossover=True)
+qap_pop200 = QAP.QAP(file="Had20.txt", use_tour=True, pop_size=200, use_pmx_crossover=True)
 avg_qap_pop200 = qap_pop200.run()
 
-ia_pop200 = immune_algorithm.ImmuneAlgorithm(file="Had12.txt", pop_size=200, p_c=0.1, p_m=0.5, n_best=80)
+ia_pop200 = immune_algorithm.ImmuneAlgorithm(file="Had20.txt", pop_size=200, p_c=0.1, p_m=0.5, n_best=80)
 avg_ia_pop200 = ia_pop200.run()
 
 
